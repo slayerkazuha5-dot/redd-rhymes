@@ -3,7 +3,7 @@
 /.pnp
 .pnp.js
 
-# next.js build output
+# Next.js build output
 /.next/
 out/
 
@@ -23,10 +23,10 @@ yarn-error.log*
 .env
 .env*.local
 
-# vercel
+# Vercel
 .vercel
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
@@ -41,12 +41,6 @@ logs/
 # cache
 .cache/
 .parcel-cache/
-
-# static generated files that are often local-only
-/public/assets/**
-
-# optional: keep generated asset folders if you want them tracked
-# !public/assets/**
 
 # OS files
 Thumbs.db
