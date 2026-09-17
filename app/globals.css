@@ -2544,15 +2544,17 @@ body:has(.brand-strategy-page) {
 }
 
 #site-header .rr-services-menu-arrow {
-  display: inline-block;
-  flex-shrink: 0;
-  width: 9px;
-  height: 6px;
   color: inherit;
-  transition: transform .25s ease;
-  transform-origin: center;
+  display: inline-block !important;
+  flex-shrink: 0;
+  height: 6px;
+  opacity: 1;
   position: relative;
   top: 1px;
+  transform-origin: center;
+  transition: transform .25s ease;
+  visibility: visible;
+  width: 9px;
 }
 
 #site-header .menu-item-has-children:hover .rr-services-menu-arrow,
@@ -2590,9 +2592,24 @@ body:has(.brand-strategy-page) {
   border-top: 2px solid #ff2633;
   box-shadow: 0 14px 30px rgba(0, 0, 0, .35);
   left: -18px;
+  opacity: 0;
   padding: 8px 0 !important;
+  pointer-events: none;
+  position: absolute;
   top: 100%;
+  transform: translateY(10px);
+  transition: opacity .2s ease, transform .2s ease, visibility .2s ease;
+  visibility: hidden;
   width: 230px;
+  z-index: 5;
+}
+
+#site-header .menu-item-has-children:hover .sub-menu,
+#site-header .menu-item-has-children:focus-within .sub-menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  visibility: visible;
 }
 
 #site-header #main-nav .sub-menu::before {
