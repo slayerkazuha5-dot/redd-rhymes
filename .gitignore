@@ -1,0 +1,52 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# next.js build output
+/.next/
+out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# editor settings
+.vscode/
+.idea/
+
+# logs
+logs/
+*.log
+
+# cache
+.cache/
+.parcel-cache/
+
+# static generated files that are often local-only
+/public/assets/**
+
+# optional: keep generated asset folders if you want them tracked
+# !public/assets/**
+
+# OS files
+Thumbs.db
