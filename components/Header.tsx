@@ -8,6 +8,7 @@ export default function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
+  const [isDesktopServicesOpen, setIsDesktopServicesOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -57,6 +58,7 @@ export default function Header() {
   useEffect(() => {
     setIsMenuOpen(false);
     setIsServicesOpen(false);
+    setIsDesktopServicesOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -124,8 +126,14 @@ export default function Header() {
                 <li className={`menu-item ${isActive('/work') ? 'current-menu-item' : ''}`}>
                   <Link href="/work">Work</Link>
                 </li>
-                <li className={`menu-item menu-item-has-children ${isActive('/services') || isActive('/brand-strategy') || isActive('/digital-marketing') || isActive('/paid-media') || isActive('/social-media') || isActive('/brand-activation') || isActive('/graphic-design') || isActive('/video-production') || isActive('/influencer-marketing') ? 'current-menu-item' : ''}`}>
-                  <Link href="/services" className="rr-services-menu-link">
+                <li
+                  className={`menu-item menu-item-has-children ${isActive('/services') || isActive('/brand-strategy') || isActive('/digital-marketing') || isActive('/paid-media') || isActive('/social-media') || isActive('/brand-activation') || isActive('/graphic-design') || isActive('/video-production') || isActive('/influencer-marketing') ? 'current-menu-item' : ''}`}
+                  onMouseEnter={() => setIsDesktopServicesOpen(true)}
+                  onMouseLeave={() => setIsDesktopServicesOpen(false)}
+                  onFocus={() => setIsDesktopServicesOpen(true)}
+                  onBlur={() => setIsDesktopServicesOpen(false)}
+                >
+                  <Link href="/services" className="rr-services-menu-link" aria-expanded={isDesktopServicesOpen} aria-haspopup="true">
                     <span>Services</span>
                     <svg
                       className="rr-services-menu-arrow"
@@ -145,7 +153,15 @@ export default function Header() {
                       />
                     </svg>
                   </Link>
-                  <ul className="sub-menu">
+                  <ul
+                    className="sub-menu"
+                    style={{
+                      opacity: isDesktopServicesOpen ? 1 : 0,
+                      visibility: isDesktopServicesOpen ? 'visible' : 'hidden',
+                      pointerEvents: isDesktopServicesOpen ? 'auto' : 'none',
+                      transform: isDesktopServicesOpen ? 'translateY(0)' : 'translateY(10px)',
+                    }}
+                  >
                     <li className="menu-item">
                       <Link href="/brand-strategy">Brand Strategy</Link>
                     </li>

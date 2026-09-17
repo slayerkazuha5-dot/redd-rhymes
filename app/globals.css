@@ -2399,9 +2399,11 @@ body:has(.brand-strategy-page) {
   display: flex;
   height: 68px !important;
   justify-content: space-between;
-  padding: 0 56px !important;
+  margin: 0 auto;
+  max-width: 1700px;
+  padding: 0 clamp(20px, 2.5vw, 56px) !important;
   position: relative !important;
-  width: 100% !important;
+  width: calc(100% - 18px) !important;
   animation: rr-navbar-enter .7s cubic-bezier(.22, 1, .36, 1) both !important;
   transition: background .35s ease, box-shadow .35s ease, height .35s ease;
 }
@@ -2488,7 +2490,9 @@ body:has(.brand-strategy-page) {
 
 #site-header-inner {
   align-items: center;
-  flex: 0 0 auto;
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: center;
   left: auto !important;
   margin: 0 !important;
   position: static !important;
@@ -2499,13 +2503,19 @@ body:has(.brand-strategy-page) {
 #site-header .main-nav {
   align-items: center;
   display: flex;
+  justify-content: center;
 }
 
 #site-header .menu {
   align-items: center;
   display: flex;
-  gap: 42px;
+  gap: clamp(18px, 1.8vw, 42px);
+  justify-content: center;
   margin: 0 !important;
+}
+
+#site-header .menu-item-has-children {
+  position: relative;
 }
 
 #site-header .menu > li {
@@ -2591,6 +2601,7 @@ body:has(.brand-strategy-page) {
   background: #0b0b0b !important;
   border-top: 2px solid #ff2633;
   box-shadow: 0 14px 30px rgba(0, 0, 0, .35);
+  display: block;
   left: -18px;
   opacity: 0;
   padding: 8px 0 !important;
@@ -2605,7 +2616,9 @@ body:has(.brand-strategy-page) {
 }
 
 #site-header .menu-item-has-children:hover .sub-menu,
-#site-header .menu-item-has-children:focus-within .sub-menu {
+#site-header .menu-item-has-children:focus-within .sub-menu,
+#site-header .menu-item-has-children:focus-within .sub-menu,
+#site-header .menu-item-has-children:hover .sub-menu {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
@@ -7316,6 +7329,16 @@ body {
   max-height: none !important;
   overflow: visible !important;
   position: relative !important;
+}
+
+@media (min-width: 1600px) {
+  #site-header {
+    width: min(100% - 28px, 1700px) !important;
+  }
+
+  #site-header .menu {
+    gap: clamp(20px, 1.35vw, 38px);
+  }
 }
 
 @media (max-width: 1100px) {
