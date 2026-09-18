@@ -7,28 +7,28 @@ import { saveLead } from '@/lib/submitLead';
 export async function POST(request: Request) {
   try {
     const input = await request.json();
-    const lead = await saveLead(input, 'scheduled');
+    const lead = await saveLead(input, 'inquiry_only');
 
-    await Promise.allSettled([
+    await Promise.all([
       mailTransporter.sendMail({
         from: `"Red Rhymes" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
         to: lead.email,
         subject: `Thanks, ${lead.name} — Red Rhymes`,
         html: brandedEmail({
-          eyebrow: 'We received your enquiry',
+          eyebrow: 'Inquiry received',
           title: `Thanks, ${lead.name}.`,
-          intro: 'Your message is safely with our team. We will review it and get back to you shortly.',
+          intro: 'We have received your inquiry. Our Red Rhymes team will review your details and contact you shortly.',
         }),
       }),
       mailTransporter.sendMail({
         from: `"Website Enquiry" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
         to: process.env.ADMIN_EMAIL || 'admin@redrhymes.com',
         replyTo: lead.email,
-        subject: 'New Scheduled Lead — Red Rhymes',
+        subject: 'New Inquiry — Red Rhymes',
         html: brandedEmail({
-          eyebrow: 'Scheduled strategy call',
+          eyebrow: 'Inquiry only',
           title: 'A new lead is ready.',
-          intro: 'Someone submitted the form and is ready to schedule a call.',
+          intro: 'Someone submitted an inquiry without booking a call.',
           fields: [
             { label: 'Name', value: lead.name },
             { label: 'Email', value: lead.email },
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       }),
     ]);
 
-    return NextResponse.json({ success: true, submissionType: 'scheduled' });
+    return NextResponse.json({ success: true, submissionType: 'inquiry_only' });
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -50,10 +50,10 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    console.error('Scheduled lead submission error:', error);
+    console.error('Inquiry submission error:', error);
     return NextResponse.json(
-      { success: false, message: 'Unable to save your enquiry right now.' },
-      { status: 503 }
+      { success: false, message: 'Unable to save your inquiry right now.' },
+      { status: 500 }
     );
   }
 }

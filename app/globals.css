@@ -77,17 +77,17 @@
   border-radius: 4px;
   box-shadow: 0 30px 80px rgba(0, 0, 0, .35);
   min-width: 0;
-  padding: clamp(24px, 4vw, 48px);
+  padding: clamp(20px, 3vw, 34px);
 }
 
 .rr-contact__form {
   display: grid;
-  gap: 24px;
+  gap: 17px;
 }
 
 .rr-contact__field {
   display: grid;
-  gap: 9px;
+  gap: 6px;
 }
 
 .rr-contact__field label {
@@ -102,13 +102,14 @@
 }
 
 .rr-contact__field input,
-.rr-contact__field select {
+.rr-contact__field select,
+.rr-contact__field textarea {
   background: rgba(0, 0, 0, .42);
   border: 1px solid rgba(255, 255, 255, .2);
   border-radius: 2px;
   color: #fff;
   font: inherit;
-  min-height: 52px;
+  min-height: 44px;
   outline: none;
   padding: 0 15px;
   transition: border-color .2s ease, box-shadow .2s ease;
@@ -124,13 +125,15 @@
 }
 
 .rr-contact__field input:focus,
-.rr-contact__field select:focus {
+.rr-contact__field select:focus,
+.rr-contact__field textarea:focus {
   border-color: #ff2633;
   box-shadow: 0 0 0 3px rgba(255, 38, 51, .15);
 }
 
 .rr-contact__field input[aria-invalid='true'],
-.rr-contact__field select[aria-invalid='true'] {
+.rr-contact__field select[aria-invalid='true'],
+.rr-contact__field textarea[aria-invalid='true'] {
   border-color: #ff2633;
 }
 
@@ -154,10 +157,52 @@
   gap: 12px;
   justify-content: center;
   letter-spacing: .14em;
-  min-height: 54px;
+  min-height: 48px;
   padding: 0 20px;
   text-transform: uppercase;
   transition: background .2s ease, transform .2s ease;
+}
+
+.rr-contact__actions {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.rr-contact__button--secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .4);
+}
+
+.rr-contact__button--secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, .1);
+  border-color: #fff;
+}
+
+.rr-contact__inquiry-success {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+}
+
+.rr-contact__inquiry-success > svg {
+  color: #ff2633;
+  margin-bottom: 24px;
+}
+
+.rr-contact__inquiry-success .rr-contact__eyebrow {
+  margin-bottom: 12px;
+}
+
+.rr-contact__inquiry-success h2 {
+  color: #fff;
+  font-size: clamp(24px, 3vw, 38px);
+  line-height: 1.1;
+  margin: 0;
+  max-width: 500px;
 }
 
 .rr-contact__button:hover:not(:disabled) {
@@ -237,6 +282,10 @@
   .rr-contact__calendar-heading h2 {
     font-size: 19px;
     line-height: 1.2;
+  }
+
+  .rr-contact__actions {
+    grid-template-columns: 1fr;
   }
 }
 

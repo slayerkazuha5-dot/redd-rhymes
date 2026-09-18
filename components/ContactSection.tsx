@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import Script from 'next/script';
-import { ArrowRight, CheckCircle, Mail, User } from 'lucide-react';
+import { ArrowRight, Building2, CheckCircle, Mail, Phone, User } from 'lucide-react';
 import { InlineWidget } from 'react-calendly';
 
 const SERVICES = [
@@ -17,13 +17,19 @@ const SERVICES = [
 type FormValues = {
   name: string;
   email: string;
+  company: string;
+  phone: string;
   challenge: string;
+  message: string;
 };
 
 const initialValues: FormValues = {
   name: '',
   email: '',
+  company: '',
+  phone: '',
   challenge: '',
+  message: '',
 };
 
 function getApiUrl() {
@@ -34,7 +40,8 @@ export default function ContactSection() {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState<Partial<FormValues>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionType, setSubmissionType] = useState<'scheduled' | 'inquiry_only' | null>(null);
+  const [activeSubmit, setActiveSubmit] = useState<'scheduled' | 'inquiry_only' | null>(null);
   const [submitError, setSubmitError] = useState('');
 
   const rawCalendlyUrl =
@@ -66,11 +73,14 @@ export default function ContactSection() {
     event.preventDefault();
     if (!validate()) return;
 
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const type = submitter?.value === 'inquiry_only' ? 'inquiry_only' : 'scheduled';
     setIsSubmitting(true);
+    setActiveSubmit(type);
     setSubmitError('');
 
     try {
-      const response = await fetch(`${getApiUrl()}/api/contact`, {
+      const response = await fetch(`${getApiUrl()}${type === 'inquiry_only' ? '/api/inquiry' : '/api/contact'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
@@ -81,7 +91,7 @@ export default function ContactSection() {
         throw new Error(result?.message || 'We could not send your enquiry.');
       }
 
-      setIsSubmitted(true);
+      setSubmissionType(type);
     } catch (error) {
       setSubmitError(
         error instanceof Error
@@ -90,6 +100,7 @@ export default function ContactSection() {
       );
     } finally {
       setIsSubmitting(false);
+      setActiveSubmit(null);
     }
   }
 
@@ -113,7 +124,7 @@ export default function ContactSection() {
         </div>
 
         <div className="rr-contact__panel">
-          {!isSubmitted ? (
+          {!submissionType ? (
             <form className="rr-contact__form" onSubmit={handleSubmit} noValidate>
               <div className="rr-contact__field">
                 <label htmlFor="rr-contact-name">
@@ -152,6 +163,36 @@ export default function ContactSection() {
               </div>
 
               <div className="rr-contact__field">
+                <label htmlFor="rr-contact-company">
+                  <Building2 size={16} aria-hidden="true" />
+                  Company
+                </label>
+                <input
+                  id="rr-contact-company"
+                  type="text"
+                  value={values.company}
+                  onChange={(event) => updateValue('company', event.target.value)}
+                  autoComplete="organization"
+                  placeholder="Company name"
+                />
+              </div>
+
+              <div className="rr-contact__field">
+                <label htmlFor="rr-contact-phone">
+                  <Phone size={16} aria-hidden="true" />
+                  Phone number
+                </label>
+                <input
+                  id="rr-contact-phone"
+                  type="tel"
+                  value={values.phone}
+                  onChange={(event) => updateValue('phone', event.target.value)}
+                  autoComplete="tel"
+                  placeholder="+91 00000 00000"
+                />
+              </div>
+
+              <div className="rr-contact__field">
                 <label htmlFor="rr-contact-challenge">What can we help with?</label>
                 <select
                   id="rr-contact-challenge"
@@ -171,18 +212,47 @@ export default function ContactSection() {
                 {errors.challenge && <p>{errors.challenge}</p>}
               </div>
 
+              <div className="rr-contact__field">
+                <label htmlFor="rr-contact-message">Tell us about your project</label>
+                <textarea
+                  id="rr-contact-message"
+                  value={values.message}
+                  onChange={(event) => updateValue('message', event.target.value)}
+                  placeholder="What are you looking to achieve?"
+                  rows={4}
+                />
+              </div>
+
               {submitError && (
                 <p className="rr-contact__submit-error" role="alert">
                   {submitError}
                 </p>
               )}
 
-              <button className="rr-contact__button" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Processing...' : 'Continue to scheduling'}
-                <ArrowRight size={18} aria-hidden="true" />
-              </button>
+              <div className="rr-contact__actions">
+                <button
+                  className="rr-contact__button"
+                  type="submit"
+                  name="submissionType"
+                  value="inquiry_only"
+                  disabled={isSubmitting}
+                >
+                  {activeSubmit === 'inquiry_only' ? 'Sending...' : 'Just send inquiry'}
+                  <ArrowRight size={18} aria-hidden="true" />
+                </button>
+                <button
+                  className="rr-contact__button"
+                  type="submit"
+                  name="submissionType"
+                  value="scheduled"
+                  disabled={isSubmitting}
+                >
+                  {activeSubmit === 'scheduled' ? 'Processing...' : 'Schedule a call'}
+                  <ArrowRight size={18} aria-hidden="true" />
+                </button>
+              </div>
             </form>
-          ) : (
+          ) : submissionType === 'scheduled' ? (
             <div className="rr-contact__calendar">
               <div className="rr-contact__calendar-heading" style={{ marginBottom: '14px' }}>
                 <CheckCircle size={22} style={{ color: '#ff2633', flexShrink: 0, marginTop: '2px' }} aria-hidden="true" />
@@ -202,6 +272,12 @@ export default function ContactSection() {
                   }}
                 />
               </div>
+            </div>
+          ) : (
+            <div className="rr-contact__inquiry-success">
+              <CheckCircle size={42} aria-hidden="true" />
+              <p className="rr-contact__eyebrow">Inquiry received</p>
+              <h2>Thanks! We&apos;ve received your inquiry and will get back to you shortly.</h2>
             </div>
           )}
         </div>
