@@ -48,7 +48,7 @@ export default function Footer() {
         <Reveal className="rr-site-footer__main" staggerChildren={0.1}>
           <Reveal className="rr-site-footer__brand" variant="default">
             <Link href="/" className="rr-site-footer__logo" aria-label="Red Rhymes home">
-              <strong>RED</strong><span>RHYMES</span><b>.</b>
+              <img src="/assets/images/logo/logo.png" alt="" aria-hidden="true" />
             </Link>
             <p className="rr-site-footer__tagline">Creative ideas. Real impact.</p>
             <p className="rr-site-footer__description">

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import ContactHero from '@/components/ContactHero';
+import ContactSection from '@/components/ContactSection';
 
 export const metadata: Metadata = {
   title: 'Contact Red Rhymes | Book a Social Media Strategy Call',
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <main>
-      <ContactHero />
+      <ContactSection />
     </main>
   );
 }

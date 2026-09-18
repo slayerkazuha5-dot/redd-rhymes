@@ -90,10 +90,8 @@ export default function Header() {
           <div id="site-log-inner">
             <Link href="/" rel="home" className="main-logo">
               <span className="rr-brand-logo" aria-label="Red Rhymes">
-                <strong>Red</strong> Rhymes<sup>®</sup>
-                <small>BRANDING ADVERTISING PRODUCTIONS</small>
+                <img src="/assets/images/logo/logo.png" alt="" aria-hidden="true" />
               </span>
-              <img id="logo-chnager" src="/assets/images/logo/redd_Black.png" alt="" aria-hidden="true" />
             </Link>
           </div>
         </div>

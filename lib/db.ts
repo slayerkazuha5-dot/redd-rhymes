@@ -1,18 +1,33 @@
-import mysql from 'mysql2/promise';
+import { Db, MongoClient } from 'mongodb';
 
-let pool: mysql.Pool | null = null;
+const uri = process.env.MONGODB_URI;
+const databaseName = process.env.MONGODB_DB || 'redrhymes';
 
-export function getDbPool() {
-  if (!pool) {
-    pool = mysql.createPool({
-      host: process.env.DB_HOST || 'localhost',
-      user: process.env.DB_USER || 'u603158705_admin',
-      password: process.env.DB_PASSWORD || 'Redrhymes@21',
-      database: process.env.DB_NAME || 'u603158705_redrhymes',
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-    });
+if (!uri) {
+  throw new Error('MONGODB_URI is not configured.');
+}
+
+declare global {
+  // eslint-disable-next-line no-var
+  var mongoClientPromise: Promise<MongoClient> | undefined;
+}
+
+function getClientPromise() {
+  const clientPromise =
+    global.mongoClientPromise ||
+    new MongoClient(uri, {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+    }).connect();
+
+  if (process.env.NODE_ENV !== 'production') {
+    global.mongoClientPromise = clientPromise;
   }
-  return pool;
+
+  return clientPromise;
+}
+
+export async function getMongoDb(): Promise<Db> {
+  const client = await getClientPromise();
+  return client.db(databaseName);
 }

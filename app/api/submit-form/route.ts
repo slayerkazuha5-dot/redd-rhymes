@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDbPool } from '@/lib/db';
+import { getMongoDb } from '@/lib/db';
 import { mailTransporter } from '@/lib/mail';
+import { brandedEmail } from '@/lib/emailTemplates';
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,25 +25,39 @@ export async function POST(req: NextRequest) {
       message = (formData.get('message') as string) || '';
     }
 
-    // Insert into MySQL contact_form table
+    // Insert into MongoDB Atlas
     try {
-      const pool = getDbPool();
-      await pool.execute(
-        'INSERT INTO `contact_form`(`name`, `phone`, `message`, `mail`) VALUES (?, ?, ?, ?)',
-        [name, phone, message, email]
-      );
+      const db = await getMongoDb();
+      await db.collection('contact_forms').insertOne({
+        name,
+        phone,
+        message,
+        email,
+        createdAt: new Date(),
+      });
     } catch (dbErr) {
-      console.error('Database insertion error:', dbErr);
+      console.error('MongoDB contact form insert error:', dbErr);
     }
 
     // Send email notification
     try {
       await mailTransporter.sendMail({
-        from: `"${name}" <${process.env.SMTP_USER || 'redd.influencer@gmail.com'}>`,
+        from: `"${name}" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
         to: process.env.ADMIN_EMAIL || 'admin@redrhymes.com',
         replyTo: email,
         subject: `Querry ${email}`,
-        text: `From: ${name}\r\nPhone: ${phone}\r\nEmail: ${email}\r\nMessage: ${message}\r\n`,
+        html: brandedEmail({
+          eyebrow: 'New contact form submission',
+          title: 'A new enquiry is ready.',
+          intro: 'A visitor has submitted the contact form.',
+          fields: [
+            { label: 'Name', value: name },
+            { label: 'Phone', value: phone },
+            { label: 'Email', value: email },
+            { label: 'Message', value: message },
+          ],
+          button: { label: 'Reply to lead', href: `mailto:${email}` },
+        }),
       });
     } catch (mailErr) {
       console.error('Email send error:', mailErr);

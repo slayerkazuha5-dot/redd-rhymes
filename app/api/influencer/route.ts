@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDbPool } from '@/lib/db';
+import { getMongoDb } from '@/lib/db';
 import { mailTransporter } from '@/lib/mail';
+import { brandedEmail } from '@/lib/emailTemplates';
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,29 +13,33 @@ export async function POST(req: NextRequest) {
     const follower = (formData.get('follower') as string) || '';
     const message = (formData.get('message') as string) || '';
 
-    // Insert into influencer table
+    // Insert into MongoDB Atlas
     try {
-      const pool = getDbPool();
-      await pool.execute(
-        'INSERT INTO `influencer`(`name`, `email`, `phone`, `platform`, `follower`, `message`) VALUES (?, ?, ?, ?, ?, ?)',
-        [name, email, phone, platform, follower, message]
-      );
+      const db = await getMongoDb();
+      await db.collection('influencers').insertOne({
+        name,
+        email,
+        phone,
+        platform,
+        follower,
+        message,
+        createdAt: new Date(),
+      });
     } catch (dbErr) {
-      console.error('Database insert error in influencer:', dbErr);
+      console.error('MongoDB influencer insert error:', dbErr);
     }
 
     // Send thank you email to influencer
     try {
       await mailTransporter.sendMail({
-        from: `"Red Rhymes" <${process.env.SMTP_USER || 'redd.influencer@gmail.com'}>`,
+        from: `"Red Rhymes" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
         to: email,
         subject: `Dear ${name}`,
-        html: `
-          Thank You for registering with us. <br>
-          We have updated your record in our database. <br>
-          And will get back to you shortly. <br><br>
-          Regards,<br>Red Rhymes Consulting Pvt. Ltd.
-        `,
+        html: brandedEmail({
+          eyebrow: 'Application received',
+          title: `Thanks, ${name}.`,
+          intro: 'We have received your influencer application and will get back to you shortly.',
+        }),
       });
     } catch (mailErr) {
       console.error('Influencer user email error:', mailErr);
@@ -43,18 +48,24 @@ export async function POST(req: NextRequest) {
     // Send email to admin
     try {
       await mailTransporter.sendMail({
-        from: `"Red Rhymes" <${process.env.SMTP_USER || 'redd.influencer@gmail.com'}>`,
+        from: `"Red Rhymes" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
         to: 'redrhymes1@gmail.com',
         replyTo: email,
         subject: "I'm an Influencer",
-        html: `
-          <strong>Name:</strong> ${name}<br>
-          <strong>Email:</strong> ${email}<br>
-          <strong>Phone:</strong> ${phone}<br>
-          <strong>Platform:</strong> ${platform}<br>
-          <strong>Followers:</strong> ${follower}<br>
-          <strong>Message:</strong> ${message}<br>
-        `,
+        html: brandedEmail({
+          eyebrow: 'New influencer application',
+          title: 'A new creator is interested.',
+          intro: 'A creator has submitted an influencer application.',
+          fields: [
+            { label: 'Name', value: name },
+            { label: 'Email', value: email },
+            { label: 'Phone', value: phone },
+            { label: 'Platform', value: platform },
+            { label: 'Followers', value: follower },
+            { label: 'Message', value: message },
+          ],
+          button: { label: 'Reply to creator', href: `mailto:${email}` },
+        }),
       });
     } catch (adminMailErr) {
       console.error('Admin influencer notification error:', adminMailErr);

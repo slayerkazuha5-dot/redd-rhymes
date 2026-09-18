@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mailTransporter } from '@/lib/mail';
+import { brandedEmail } from '@/lib/emailTemplates';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,11 +14,24 @@ export async function POST(req: NextRequest) {
 
     try {
       await mailTransporter.sendMail({
-        from: `"${name}" <${process.env.SMTP_USER || 'redd.influencer@gmail.com'}>`,
+        from: `"${name}" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
         to: process.env.ADMIN_EMAIL || 'admin@redrhymes.com',
         replyTo: email,
         subject: 'Request for Influencer Company',
-        text: `From: ${name}\r\nEmail: ${email}\r\nPhone: ${phone}\r\nCompany: ${company}\r\nWebsite: ${site}\r\nService: ${checkbox}\r\n`,
+        html: brandedEmail({
+          eyebrow: 'Company request',
+          title: 'A new company enquiry is ready.',
+          intro: 'A company has requested information about influencer marketing.',
+          fields: [
+            { label: 'Name', value: name },
+            { label: 'Email', value: email },
+            { label: 'Phone', value: phone },
+            { label: 'Company', value: company },
+            { label: 'Website', value: site },
+            { label: 'Service', value: checkbox },
+          ],
+          button: { label: 'Reply to company', href: `mailto:${email}` },
+        }),
       });
     } catch (mailErr) {
       console.error('Company request email error:', mailErr);

@@ -1,17 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDbPool } from '@/lib/db';
+import { getMongoDb } from '@/lib/db';
 import { mailTransporter } from '@/lib/mail';
+import { brandedEmail } from '@/lib/emailTemplates';
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const name = (formData.get('name') as string) || '';
-    const email = (formData.get('email') as string) || '';
-    const phone = (formData.get('phone') as string) || '';
-    const site = (formData.get('purpose') as string) || (formData.get('site') as string) || '';
-    const services = (formData.get('services') as string) || '';
-    const message = (formData.get('message') as string) || '';
-    const recaptchaResponse = (formData.get('g-recaptcha-response') as string) || '';
+    const contentType = req.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+    const data = isJson ? await req.json() : Object.fromEntries(await (await req.formData()).entries());
+    const name = String(data.name || '').trim();
+    const email = String(data.email || '').trim();
+    const phone = String(data.phone || '').trim();
+    const site = String(data.purpose || data.site || '').trim();
+    const services = String(data.services || data.challenge || '').trim();
+    const message = String(data.message || '').trim();
+    const recaptchaResponse = String(data['g-recaptcha-response'] || '');
+
+    if (!name || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !services) {
+      if (isJson) {
+        return NextResponse.json(
+          { success: false, message: 'Name, email, and service are required.' },
+          { status: 400 }
+        );
+      }
+      return NextResponse.redirect(new URL('/contact?status=invalid', req.url), 303);
+    }
 
     // Verify reCAPTCHA if provided
     const recaptchaSecret = process.env.RECAPTCHA_SECRET || '6LfabWQmAAAAADCWMyFkDMh0vKr5Udk8hcGafQAO';
@@ -30,29 +43,33 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Insert into MySQL user table
+    // Insert into MongoDB Atlas
     try {
-      const pool = getDbPool();
-      await pool.execute(
-        'INSERT INTO `user` (`name`, `email`, `phone`, `site`, `services`, `message`) VALUES (?, ?, ?, ?, ?, ?)',
-        [name, email, phone, site, services, message]
-      );
+      const db = await getMongoDb();
+      await db.collection('leads').insertOne({
+        name,
+        email,
+        phone,
+        site,
+        services,
+        message,
+        createdAt: new Date(),
+      });
     } catch (dbErr) {
-      console.error('Database user insert error:', dbErr);
+      console.error('MongoDB contact lead insert error:', dbErr);
     }
 
     // Send thank you email to user
     try {
       await mailTransporter.sendMail({
-        from: `"Red Rhymes" <${process.env.SMTP_USER || 'redd.influencer@gmail.com'}>`,
+        from: `"Red Rhymes" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
         to: email,
         subject: `Dear ${name}`,
-        html: `
-          Thank you for registering with us.<br>
-          We have updated your record in our database.<br>
-          We will get back to you shortly.<br><br>
-          Regards,<br>RedRhymes Consulting Pvt. Ltd.
-        `,
+        html: brandedEmail({
+          eyebrow: 'We received your enquiry',
+          title: `Thanks, ${name}.`,
+          intro: 'Your message is safely with our team. We will review it and get back to you shortly.',
+        }),
       });
     } catch (userMailErr) {
       console.error('User email send error:', userMailErr);
@@ -61,26 +78,41 @@ export async function POST(req: NextRequest) {
     // Send notification email to admin
     try {
       await mailTransporter.sendMail({
-        from: `"Website Enquiry" <${process.env.SMTP_USER || 'redd.influencer@gmail.com'}>`,
+        from: `"Website Enquiry" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
         to: process.env.ADMIN_EMAIL || 'admin@redrhymes.com',
         replyTo: email,
         subject: 'New Contact Form Submission',
-        html: `
-          <strong>Name:</strong> ${name}<br>
-          <strong>Email:</strong> ${email}<br>
-          <strong>Phone:</strong> ${phone}<br>
-          <strong>Purpose:</strong> ${site}<br>
-          <strong>Services:</strong> ${services}<br>
-          <strong>Message:</strong><br>${message}
-        `,
+        html: brandedEmail({
+          eyebrow: 'New website enquiry',
+          title: 'A new lead is ready.',
+          intro: 'Someone has reached out through the Red Rhymes contact form.',
+          fields: [
+            { label: 'Name', value: name },
+            { label: 'Email', value: email },
+            { label: 'Phone', value: phone },
+            { label: 'Purpose', value: site },
+            { label: 'Services', value: services },
+            { label: 'Message', value: message },
+          ],
+          button: { label: 'Reply to lead', href: `mailto:${email}` },
+        }),
       });
     } catch (adminMailErr) {
       console.error('Admin email send error:', adminMailErr);
     }
 
+    if (isJson) {
+      return NextResponse.json({ success: true, message: 'Message sent successfully.' });
+    }
     return NextResponse.redirect(new URL('/contact?status=success', req.url), 303);
   } catch (error) {
     console.error('Error in contact form process:', error);
+    if (req.headers.get('content-type')?.includes('application/json')) {
+      return NextResponse.json(
+        { success: false, message: 'Unable to process your enquiry right now.' },
+        { status: 500 }
+      );
+    }
     return NextResponse.redirect(new URL('/contact?status=error', req.url), 303);
   }
 }
