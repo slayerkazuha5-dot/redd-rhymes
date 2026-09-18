@@ -9,6 +9,8 @@ type MailOptions = {
   html?: string;
 };
 
+export const DEFAULT_EMAIL = 'rhymesredd@gmail.com';
+
 function parseAddress(address: MailAddress) {
   if (typeof address !== 'string') return address;
 

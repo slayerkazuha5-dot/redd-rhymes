@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { mailTransporter } from '@/lib/mail';
+import { DEFAULT_EMAIL, mailTransporter } from '@/lib/mail';
 import { brandedEmail } from '@/lib/emailTemplates';
 
 export async function POST(req: NextRequest) {
@@ -14,8 +14,8 @@ export async function POST(req: NextRequest) {
 
     try {
       await mailTransporter.sendMail({
-        from: `"${name}" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
-        to: process.env.ADMIN_EMAIL || 'admin@redrhymes.com',
+        from: `"${name}" <${process.env.BREVO_SENDER_EMAIL || DEFAULT_EMAIL}>`,
+        to: process.env.ADMIN_EMAIL || DEFAULT_EMAIL,
         replyTo: email,
         subject: 'Request for Influencer Company',
         html: brandedEmail({

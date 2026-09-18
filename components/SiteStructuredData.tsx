@@ -6,7 +6,7 @@ export default function SiteStructuredData() {
       name: 'Red Rhymes',
       url: 'https://redrhymes.com/',
       logo: 'https://redrhymes.com/assets/images/logo/redd_Black.png',
-      email: 'admin@redrhymes.com',
+      email: 'rhymesredd@gmail.com',
       telephone: '+91 9971 094 965',
       sameAs: [
         'https://www.facebook.com/redrhymes1',
@@ -22,7 +22,7 @@ export default function SiteStructuredData() {
       url: 'https://redrhymes.com/',
       image: 'https://redrhymes.com/assets/images/logo/redd_Black.png',
       telephone: '+91 9971 094 965',
-      email: 'admin@redrhymes.com',
+      email: 'rhymesredd@gmail.com',
       address: {
         '@type': 'PostalAddress',
         streetAddress: 'E-2, Sector 63',

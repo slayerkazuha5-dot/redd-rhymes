@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { brandedEmail } from '@/lib/emailTemplates';
-import { mailTransporter } from '@/lib/mail';
+import { DEFAULT_EMAIL, mailTransporter } from '@/lib/mail';
 import { saveLead } from '@/lib/submitLead';
 
 export async function POST(request: Request) {
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     await Promise.allSettled([
       mailTransporter.sendMail({
-        from: `"Red Rhymes" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
+        from: `"Red Rhymes" <${process.env.BREVO_SENDER_EMAIL || DEFAULT_EMAIL}>`,
         to: lead.email,
         subject: `Thanks, ${lead.name} — Red Rhymes`,
         html: brandedEmail({
@@ -21,8 +21,8 @@ export async function POST(request: Request) {
         }),
       }),
       mailTransporter.sendMail({
-        from: `"Website Enquiry" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
-        to: process.env.ADMIN_EMAIL || 'admin@redrhymes.com',
+        from: `"Website Enquiry" <${process.env.BREVO_SENDER_EMAIL || DEFAULT_EMAIL}>`,
+        to: process.env.ADMIN_EMAIL || DEFAULT_EMAIL,
         replyTo: lead.email,
         subject: 'New Scheduled Lead — Red Rhymes',
         html: brandedEmail({

@@ -88,8 +88,8 @@ export default function ContactHero() {
 
         <div className="ch__contact-row">
           <span className="ch__contact-label">EMAIL</span>
-          <a href="mailto:admin@redrhymes.com" className="ch__contact-link">
-            admin@redrhymes.com <span className="ch__contact-arrow" aria-hidden="true">↗</span>
+          <a href="mailto:rhymesredd@gmail.com" className="ch__contact-link">
+            rhymesredd@gmail.com <span className="ch__contact-arrow" aria-hidden="true">↗</span>
           </a>
           <span className="ch__contact-underline" aria-hidden="true" />
         </div>

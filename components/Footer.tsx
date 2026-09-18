@@ -75,7 +75,7 @@ export default function Footer() {
           <Reveal className="rr-site-footer__contact" variant="default">
             <h2>Contact</h2>
             <a href="https://maps.google.com/?q=Noida,India">⌖ <span>Noida, India</span></a>
-            <a href="mailto:admin@redrhymes.com">✉ <span>admin@redrhymes.com</span></a>
+            <a href="mailto:rhymesredd@gmail.com">✉ <span>rhymesredd@gmail.com</span></a>
             <i />
             <h3>Stay in the loop.</h3>
             <p>Get the latest insights, ideas and updates.</p>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db';
-import { mailTransporter } from '@/lib/mail';
+import { DEFAULT_EMAIL, mailTransporter } from '@/lib/mail';
 import { brandedEmail } from '@/lib/emailTemplates';
 
 export async function POST(req: NextRequest) {
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     // Send thank you email to influencer
     try {
       await mailTransporter.sendMail({
-        from: `"Red Rhymes" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
+        from: `"Red Rhymes" <${process.env.BREVO_SENDER_EMAIL || DEFAULT_EMAIL}>`,
         to: email,
         subject: `Dear ${name}`,
         html: brandedEmail({
@@ -48,8 +48,8 @@ export async function POST(req: NextRequest) {
     // Send email to admin
     try {
       await mailTransporter.sendMail({
-        from: `"Red Rhymes" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@example.com'}>`,
-        to: 'redrhymes1@gmail.com',
+        from: `"Red Rhymes" <${process.env.BREVO_SENDER_EMAIL || DEFAULT_EMAIL}>`,
+        to: process.env.ADMIN_EMAIL || DEFAULT_EMAIL,
         replyTo: email,
         subject: "I'm an Influencer",
         html: brandedEmail({
